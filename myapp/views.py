@@ -54,6 +54,7 @@ from .models import (
     UserChallenge, Investment, RecommendationVideo, 
 )
 from .forms import ExpenseForm, PaymentMethodForm, RegisterForm, LoginForm, InvestmentForm
+from .decorators import session_login_required
 
 import json, datetime
 from datetime import date, timedelta
@@ -97,7 +98,7 @@ def register_view(request):
 
             request.session['user_id'] = user.id
 
-            print("✅ Intentando enviar correo a:", user.email)
+            print("Intentando enviar correo a:", user.email)
             print("Desde:", settings.DEFAULT_FROM_EMAIL)
 
             try:
@@ -118,13 +119,13 @@ El equipo de TuChanchita 💰
                     recipient_list=[user.email],
                     fail_silently=False,
                 )
-                print("✅ Correo enviado correctamente")
+                print("Correo enviado correctamente")
             except Exception as e:
-                print("❌ Error al enviar el correo:", e)
+                print("Error al enviar el correo:", e)
 
             return redirect('dashboard')
         else:
-            print("❌ Formulario no válido:", form.errors)
+            print("Formulario no valido:", form.errors)
     else:
         form = RegisterForm()
     return render(request, 'register.html', {'form': form})
@@ -159,6 +160,7 @@ def logout_view(request):
     return redirect('login')
 
 # ----------------- Dashboard -----------------
+@session_login_required
 def dashboard_view(request):
     user = UserProfile.objects.get(id=request.session['user_id'])
     hoy = now()
@@ -297,28 +299,6 @@ def reports_view(request):
         'resumen_mensual': resumen_mensual,
         'today': date.today()
     })
-
-
-def export_pdf_view(request):
-    user = UserProfile.objects.get(id=request.session['user_id'])
-    expenses = Expense.objects.filter(user=user)
-    response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = 'attachment; filename="reporte_gastos.pdf"'
-
-    p = canvas.Canvas(response, pagesize=letter)
-    y = 750
-    p.drawString(100, y, f"Reporte de gastos - {user.first_name}")
-    y -= 30
-
-    for e in expenses:
-        p.drawString(100, y, f"{e.date} - {e.category} - S/. {e.amount}")
-        y -= 20
-        if y < 100:
-            p.showPage()
-            y = 750
-
-    p.save()
-    return response
 
 # ----------------- Recomendaciones -----------------
 def recommendations_view(request):
@@ -649,7 +629,7 @@ def trivia_view(request):
 
         if seleccion == pregunta.respuesta_correcta.strip().lower():
             request.session['puntos_trivia'] += 100
-            mensaje = "✅ ¡Correcto! Has ganado 100 puntos."
+            mensaje = "Correcto! Has ganado 100 puntos."
             resultado_audio = "correct"
         else:
             request.session['fallos_trivia'] += 1

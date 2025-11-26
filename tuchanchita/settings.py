@@ -20,8 +20,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-# REEMPLAZA con tu SECRET_KEY generado con: python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
-SECRET_KEY = 'django-insecure-REEMPLAZA-CON-TU-SECRET-KEY-AQUI'
+SECRET_KEY = 'django-insecure-l5-gipjy#wvexu^k!0=^d7nndbi93@!i@0m-r0(m(psoxm$jt@'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -127,9 +126,9 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'tu_email@gmail.com'  # REEMPLAZA con tu email
-EMAIL_HOST_PASSWORD = 'tu_app_password'  # REEMPLAZA con tu App Password de Gmail
+EMAIL_HOST_USER = 'gianfranco22.ft@gmail.com'        
+EMAIL_HOST_PASSWORD = 'bewa nszi jxpa dahr'  
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
-TWELVE_API_KEY = ""  # REEMPLAZA con tu Twelve Data API Key
-OPENAI_API_KEY = ''  # REEMPLAZA con tu OpenAI API Key
+TWELVE_API_KEY = "bf488cfa7095425597392835e27e7899"
+OPENAI_API_KEY = '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'

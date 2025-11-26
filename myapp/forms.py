@@ -127,7 +127,7 @@ class RegisterForm(forms.ModelForm):
             raise forms.ValidationError('Este correo ya está registrado. Intenta iniciar sesión o recupera tu contraseña.')
 
         # 2️⃣ Validar con Abstract API (correo real)
-        API_KEY = 'TU_API_KEY_AQUI'  # REEMPLAZA con tu Abstract API KEY
+        API_KEY = '83e60704ad924a309ec603243337b8c5'  # REEMPLAZA con tu API KEY
         url = f"https://emailvalidation.abstractapi.com/v1/?api_key={API_KEY}&email={email}"
 
         try:
