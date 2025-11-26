@@ -1,20 +1,53 @@
 # Ignora entorno virtual
 venv/
 .env
+.venv/
+env/
+ENV/
 
 # Archivos de cache y compilados
 __pycache__/
 *.py[cod]
+*.pyc
+*.pyo
+*.pyd
+.Python
 
 # Archivos de entorno o configuración
 *.log
 *.pot
-*.pyc
+*.db
+db.sqlite3
+db.sqlite3-journal
+
+# Archivos de coverage
+.coverage
+.coverage.*
+htmlcov/
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# Archivos de media y estáticos generados
+media/
+profile_photos/
+staticfiles/
+static/
 
 # Config de VSCode o PyCharm
 .vscode/
 .idea/
+*.swp
+*.swo
+*~
 
 # Archivos del sistema
 .DS_Store
 Thumbs.db
+desktop.ini
+
+# Archivos de Python
+*.egg-info/
+dist/
+build/
+*.egg
