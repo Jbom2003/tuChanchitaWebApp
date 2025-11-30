@@ -1,0 +1,137 @@
+{% extends 'layout/base.html' %}
+{% load static %}
+{% load markdown_filter %}
+{% block title %}{{ capitulo.titulo }} - TuChanchita{% endblock %}
+
+{% block extra_css %}
+<style>
+.capitulo-detalle {
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 30px;
+  background: rgba(255, 255, 255, 0.07);
+  border-radius: 15px;
+}
+
+.contenido-texto {
+  line-height: 1.8;
+  margin: 30px 0;
+  font-size: 1.1em;
+}
+
+.contenido-texto h1 {
+  font-size: 2em;
+  margin-top: 30px;
+  margin-bottom: 20px;
+  color: #60A5FA;
+  border-bottom: 2px solid rgba(96, 165, 250, 0.3);
+  padding-bottom: 10px;
+}
+
+.contenido-texto h2 {
+  font-size: 1.6em;
+  margin-top: 25px;
+  margin-bottom: 15px;
+  color: #93c5fd;
+}
+
+.contenido-texto h3 {
+  font-size: 1.3em;
+  margin-top: 20px;
+  margin-bottom: 12px;
+  color: #bfdbfe;
+}
+
+.contenido-texto p {
+  margin-bottom: 15px;
+}
+
+.contenido-texto strong {
+  font-weight: bold;
+  color: #fff;
+}
+
+.contenido-texto em {
+  font-style: italic;
+}
+
+.contenido-texto ul, .contenido-texto ol {
+  margin: 15px 0;
+  padding-left: 30px;
+}
+
+.contenido-texto li {
+  margin-bottom: 8px;
+}
+
+.contenido-texto code {
+  background: rgba(0, 0, 0, 0.3);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9em;
+}
+
+.contenido-texto pre {
+  background: rgba(0, 0, 0, 0.3);
+  padding: 15px;
+  border-radius: 8px;
+  overflow-x: auto;
+  margin: 15px 0;
+}
+
+.contenido-texto pre code {
+  background: none;
+  padding: 0;
+}
+
+.btn-completar {
+  background: #4caf50;
+  color: white;
+  padding: 15px 30px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  margin-top: 20px;
+}
+
+.btn-primary {
+  background: #60A5FA;
+  color: white;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  text-decoration: none;
+  display: inline-block;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="capitulo-detalle">
+  <h1>Capitulo {{ capitulo.capitulo_numero }}: {{ capitulo.titulo }}</h1>
+  
+  <div class="contenido-texto">
+    {{ capitulo.contenido_educativo|markdown }}
+  </div>
+  
+  {% if not progreso.completado %}
+    <form method="post" action="{% url 'completar_capitulo' capitulo.id %}" style="text-align: center;">
+      {% csrf_token %}
+      <button type="submit" class="btn-completar">Marcar como Completado</button>
+    </form>
+  {% else %}
+    <div style="background: rgba(76, 175, 80, 0.2); padding: 15px; border-radius: 8px; text-align: center; margin-top: 20px;">
+      <p>✓ Este capitulo ya fue completado el {{ progreso.fecha_completado|date:"d/m/Y" }}</p>
+    </div>
+  {% endif %}
+  
+  <div style="margin-top: 30px;">
+    <a href="{% url 'narrativa' %}" class="btn-primary">Volver a Narrativa</a>
+    <a href="{% url 'dashboard' %}" class="btn-primary" style="background: #666; margin-left: 10px;">Dashboard</a>
+  </div>
+</div>
+{% endblock %}
+
+

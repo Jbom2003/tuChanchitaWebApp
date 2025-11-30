@@ -1,0 +1,188 @@
+{% extends 'layout/base.html' %}
+{% load static %}
+{% block title %}Biblioteca Educativa - TuChanchita{% endblock %}
+
+{% block extra_css %}
+<style>
+.biblioteca-container {
+  max-width: 1000px;
+  margin: 40px auto;
+  padding: 30px;
+}
+
+.filtros {
+  background: rgba(255, 255, 255, 0.07);
+  padding: 20px;
+  border-radius: 10px;
+  margin-bottom: 30px;
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.filtros input, .filtros select {
+  padding: 8px;
+  border-radius: 5px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(30, 58, 138, 0.9);
+  color: white;
+  font-size: 14px;
+}
+
+.filtros select {
+  background: rgba(30, 58, 138, 0.9);
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='white' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  padding-right: 30px;
+}
+
+.filtros select option {
+  background: #1E3A8A;
+  color: white;
+  padding: 8px;
+}
+
+.contenido-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.contenido-card {
+  background: rgba(255, 255, 255, 0.07);
+  padding: 20px;
+  border-radius: 10px;
+  transition: transform 0.2s;
+}
+
+.contenido-card:hover {
+  transform: translateY(-5px);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.badge {
+  display: inline-block;
+  padding: 5px 10px;
+  border-radius: 15px;
+  font-size: 0.8em;
+  margin-right: 5px;
+}
+
+.btn-primary {
+  background: #60A5FA;
+  color: white;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 5px;
+  text-decoration: none;
+  display: inline-block;
+  margin-top: 10px;
+}
+
+/* Fondo animado de burbujas */
+.bubble-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.bubble {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.07);
+  animation: float infinite ease-in-out;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-60px); }
+}
+
+.biblioteca-container {
+  position: relative;
+  z-index: 1;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="bubble-container" id="bubble-container"></div>
+
+<div class="biblioteca-container">
+  <h2>Biblioteca Educativa</h2>
+  
+  <form method="get" class="filtros">
+    <input type="text" name="q" placeholder="Buscar..." value="{{ request.GET.q }}">
+    <select name="categoria">
+      <option value="">Todas las categorias</option>
+      {% for val, label in categorias %}
+        <option value="{{ val }}" {% if request.GET.categoria == val %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+    <select name="tipo">
+      <option value="">Todos los tipos</option>
+      {% for val, label in tipos %}
+        <option value="{{ val }}" {% if request.GET.tipo == val %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit" style="padding: 8px 20px; background: #60A5FA; color: white; border: none; border-radius: 5px; cursor: pointer;">Filtrar</button>
+  </form>
+  
+  {% if contenido_recomendado %}
+    <h3>Recomendado para ti</h3>
+    <div class="contenido-grid">
+      {% for contenido in contenido_recomendado %}
+        <div class="contenido-card">
+          <span class="badge" style="background: #60A5FA;">{{ contenido.get_tipo_contenido_display }}</span>
+          <span class="badge" style="background: #4caf50;">{{ contenido.get_categoria_display }}</span>
+          <h4>{{ contenido.titulo }}</h4>
+          <p>{{ contenido.descripcion|truncatewords:20 }}</p>
+          <p style="font-size: 0.9em; opacity: 0.7;">{{ contenido.duracion_minutos }} min | {{ contenido.visualizaciones }} vistas</p>
+          <a href="{% url 'ver_contenido' contenido.id %}" class="btn-primary">Ver Contenido</a>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+  
+  <h3>Todos los Contenidos</h3>
+  <div class="contenido-grid">
+    {% for contenido in contenidos %}
+      <div class="contenido-card">
+        <span class="badge" style="background: #60A5FA;">{{ contenido.get_tipo_contenido_display }}</span>
+        <span class="badge" style="background: #4caf50;">{{ contenido.get_categoria_display }}</span>
+        <h4>{{ contenido.titulo }}</h4>
+        <p>{{ contenido.descripcion|truncatewords:20 }}</p>
+        <p style="font-size: 0.9em; opacity: 0.7;">{{ contenido.duracion_minutos }} min | {{ contenido.visualizaciones }} vistas</p>
+        <a href="{% url 'ver_contenido' contenido.id %}" class="btn-primary">Ver Contenido</a>
+      </div>
+    {% empty %}
+      <p>No se encontraron contenidos con esos filtros.</p>
+    {% endfor %}
+  </div>
+</div>
+
+<script>
+  const container = document.getElementById("bubble-container");
+  for (let i = 0; i < 20; i++) {
+    const bubble = document.createElement("div");
+    bubble.classList.add("bubble");
+    const size = Math.floor(Math.random() * 150) + 50;
+    bubble.style.width = `${size}px`;
+    bubble.style.height = `${size}px`;
+    bubble.style.top = `${Math.random() * 100}%`;
+    bubble.style.left = `${Math.random() * 100}%`;
+    bubble.style.animationDuration = `${(Math.random() * 1.5 + 3.5).toFixed(1)}s`;
+    container.appendChild(bubble);
+  }
+</script>
+{% endblock %}
+

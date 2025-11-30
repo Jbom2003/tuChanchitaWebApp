@@ -1,0 +1,133 @@
+{% load static %}
+<link rel="shortcut icon" href="{% static 'images/favicon.ico' %}" type="image/x-icon">
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recuperar contraseña - TuChanchita</title>
+  <link rel="stylesheet" href="{% static 'styles/login.css' %}">
+  <style>
+    body {
+      margin: 0;
+      background: linear-gradient(to bottom right, #4f46e5, #3b82f6);
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    .center-wrapper {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      position: relative;
+    }
+
+    .form-container {
+      background-color: #1e3a8a;
+      padding: 60px 40px 40px;
+      border-radius: 12px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+      color: white;
+      width: 400px;
+      text-align: center;
+      position: relative;
+    }
+
+    .logo-circle {
+      width: 100px;
+      height: 100px;
+      background-color: white;
+      border-radius: 50%;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      position: absolute;
+      top: -50px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .logo-circle img {
+      width: 70px;
+      height: auto;
+    }
+
+    input[type="email"] {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      background-color: #3b82f6;
+      color: white;
+      margin-top: 10px;
+      margin-bottom: 20px;
+    }
+
+    input[type="email"]::placeholder {
+      color: #dbeafe;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      background-color: #60a5fa;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    button:hover {
+      background-color: #3b82f6;
+    }
+
+    .mensaje {
+      margin-top: 20px;
+      font-size: 14px;
+      color: #d1d5db;
+    }
+  </style>
+</head>
+<body>
+  <div class="bubble-container" id="bubble-container"></div>
+
+  <main class="center-wrapper">
+    <div class="form-container">
+      <div class="logo-circle">
+        <img src="{% static 'images/logo.png' %}" alt="TuChanchita Logo">
+      </div>
+
+      <h2>Olvidé mi contraseña</h2>
+      <form method="post">
+        {% csrf_token %}
+        <label for="email">Correo:</label>
+        <input type="email" name="email" placeholder="Ingresa tu correo" required>
+        <button type="submit">Enviar enlace</button>
+      </form>
+      {% if mensaje %}
+      <p class="mensaje">{{ mensaje }}</p>
+      {% endif %}
+    </div>
+  </main>
+
+  <script>
+    const container = document.getElementById("bubble-container");
+    function createBubble() {
+      const bubble = document.createElement("div");
+      bubble.classList.add("bubble");
+      const size = Math.floor(Math.random() * 150) + 50;
+      bubble.style.width = `${size}px`;
+      bubble.style.height = `${size}px`;
+      bubble.style.top = `${Math.random() * 100}%`;
+      bubble.style.left = `${Math.random() * 100}%`;
+      bubble.style.animationDuration = `${(Math.random() * 1.5 + 3.5).toFixed(1)}s`;
+      container.appendChild(bubble);
+    }
+    for (let i = 0; i < 20; i++) createBubble();
+  </script>
+</body>
+</html>

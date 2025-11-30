@@ -1,0 +1,244 @@
+{% extends 'layout/base.html' %}
+{% load static %}
+{% block title %}🏆 Ranking Completar Frases - TuChanchita{% endblock %}
+
+{% block extra_css %}
+<style>
+  .ranking-container {
+    max-width: 700px;
+    margin: 50px auto;
+    padding: 30px;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 15px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+    color: white;
+    z-index: 1;
+    position: relative;
+    text-align: center;
+  }
+
+  .ranking-container h2 {
+    margin-bottom: 30px;
+    font-size: 28px;
+  }
+
+  .podium {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    margin-bottom: 40px;
+    gap: 30px;
+  }
+
+  .podium-box {
+    width: 120px;
+    padding: 15px;
+    background-color: rgba(255,255,255,0.1);
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    font-weight: bold;
+    color: white;
+  }
+
+  .first { height: 140px; background: #facc15; color: black; }
+  .second { height: 110px; background: #cbd5e1; color: black; }
+  .third { height: 90px; background: #f87171; color: black; }
+
+  .leaderboard {
+    margin-top: 40px;
+    text-align: left;
+  }
+
+  .leaderboard h3 {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 24px;
+  }
+
+  .leaderboard-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .leaderboard-table thead {
+    background: rgba(96, 165, 250, 0.2);
+  }
+
+  .leaderboard-table th {
+    padding: 15px;
+    text-align: left;
+    font-weight: bold;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .leaderboard-table td {
+    padding: 12px 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .leaderboard-table tr:hover {
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  .leaderboard-table tr:last-child td {
+    border-bottom: none;
+  }
+
+  .rank-badge {
+    display: inline-block;
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
+    text-align: center;
+    border-radius: 50%;
+    font-weight: bold;
+    margin-right: 10px;
+  }
+
+  .rank-1 { background: #facc15; color: black; }
+  .rank-2 { background: #cbd5e1; color: black; }
+  .rank-3 { background: #f87171; color: black; }
+  .rank-other { background: rgba(255, 255, 255, 0.1); color: white; }
+
+  .back-button {
+    margin-top: 30px;
+  }
+
+  .back-button a button {
+    background-color: #60A5FA;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+
+  .back-button button:hover {
+    background-color: #3B82F6;
+  }
+
+  .bubble-container {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+  }
+
+  .bubble {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.07);
+    animation: float infinite ease-in-out;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-60px); }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="bubble-container" id="bubble-container"></div>
+
+<main class="ranking-container">
+  <h2>🏆 Ranking - Completar Frases</h2>
+  
+  <div class="podium">
+    {% if top_users.1 %}
+    <div class="podium-box second">
+        🥈<br>{{ top_users.1.user.first_name|default:top_users.1.user.email|truncatewords:1 }}<br>{{ top_users.1.puntaje_total }} pts
+    </div>
+    {% else %}
+    <div class="podium-box second" style="opacity: 0.3;">
+        🥈<br>-<br>- pts
+    </div>
+    {% endif %}
+
+    {% if top_users.0 %}
+    <div class="podium-box first">
+        🥇<br>{{ top_users.0.user.first_name|default:top_users.0.user.email|truncatewords:1 }}<br>{{ top_users.0.puntaje_total }} pts
+    </div>
+    {% else %}
+    <div class="podium-box first" style="opacity: 0.3;">
+        🥇<br>-<br>- pts
+    </div>
+    {% endif %}
+
+    {% if top_users.2 %}
+    <div class="podium-box third">
+        🥉<br>{{ top_users.2.user.first_name|default:top_users.2.user.email|truncatewords:1 }}<br>{{ top_users.2.puntaje_total }} pts
+    </div>
+    {% else %}
+    <div class="podium-box third" style="opacity: 0.3;">
+        🥉<br>-<br>- pts
+    </div>
+    {% endif %}
+  </div>
+
+  <div class="leaderboard">
+    <h3>📊 Leaderboard Completo</h3>
+    <table class="leaderboard-table">
+      <thead>
+        <tr>
+          <th>Posición</th>
+          <th>Usuario</th>
+          <th>Puntos</th>
+          <th>Frases Completadas</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for user_score in all_users %}
+        <tr>
+          <td>
+            {% if forloop.counter == 1 %}
+              <span class="rank-badge rank-1">🥇</span>
+            {% elif forloop.counter == 2 %}
+              <span class="rank-badge rank-2">🥈</span>
+            {% elif forloop.counter == 3 %}
+              <span class="rank-badge rank-3">🥉</span>
+            {% else %}
+              <span class="rank-badge rank-other">{{ forloop.counter }}</span>
+            {% endif %}
+          </td>
+          <td>{{ user_score.user.first_name|default:user_score.user.email }}</td>
+          <td><strong>{{ user_score.puntaje_total }}</strong></td>
+          <td>{{ user_score.frases_completadas }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="4" style="text-align: center; padding: 20px;">
+            No hay participantes aún. ¡Sé el primero en jugar!
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="back-button">
+    <a href="{% url 'juegos' %}"><button>← Volver a Juegos</button></a>
+  </div>
+</main>
+
+<script>
+  const container = document.getElementById("bubble-container");
+  for (let i = 0; i < 20; i++) {
+    const bubble = document.createElement("div");
+    bubble.classList.add("bubble");
+    const size = Math.floor(Math.random() * 150) + 50;
+    bubble.style.width = `${size}px`;
+    bubble.style.height = `${size}px`;
+    bubble.style.top = `${Math.random() * 100}%`;
+    bubble.style.left = `${Math.random() * 100}%`;
+    bubble.style.animationDuration = `${(Math.random() * 1.5 + 3.5).toFixed(1)}s`;
+    container.appendChild(bubble);
+  }
+</script>
+{% endblock %}

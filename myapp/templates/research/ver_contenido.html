@@ -1,0 +1,193 @@
+{% extends 'layout/base.html' %}
+{% load static %}
+{% load markdown_filter %}
+{% block title %}{{ contenido.titulo }} - TuChanchita{% endblock %}
+
+{% block extra_css %}
+<style>
+.contenido-detalle {
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 30px;
+  background: rgba(255, 255, 255, 0.07);
+  border-radius: 15px;
+}
+
+.meta-info {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.badge {
+  padding: 5px 15px;
+  border-radius: 20px;
+  font-size: 0.9em;
+}
+
+.contenido-body {
+  line-height: 1.8;
+  margin: 30px 0;
+}
+
+.contenido-body h1 {
+  font-size: 2em;
+  margin-top: 30px;
+  margin-bottom: 20px;
+  color: #60A5FA;
+  border-bottom: 2px solid rgba(96, 165, 250, 0.3);
+  padding-bottom: 10px;
+}
+
+.contenido-body h2 {
+  font-size: 1.6em;
+  margin-top: 25px;
+  margin-bottom: 15px;
+  color: #93c5fd;
+}
+
+.contenido-body h3 {
+  font-size: 1.3em;
+  margin-top: 20px;
+  margin-bottom: 12px;
+  color: #bfdbfe;
+}
+
+.contenido-body p {
+  margin-bottom: 15px;
+}
+
+.contenido-body strong {
+  font-weight: bold;
+  color: #fff;
+}
+
+.contenido-body em {
+  font-style: italic;
+}
+
+.contenido-body ul, .contenido-body ol {
+  margin: 15px 0;
+  padding-left: 30px;
+}
+
+.contenido-body li {
+  margin-bottom: 8px;
+}
+
+.contenido-body code {
+  background: rgba(0, 0, 0, 0.3);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9em;
+}
+
+.contenido-body pre {
+  background: rgba(0, 0, 0, 0.3);
+  padding: 15px;
+  border-radius: 8px;
+  overflow-x: auto;
+  margin: 15px 0;
+}
+
+.contenido-body pre code {
+  background: none;
+  padding: 0;
+}
+
+.btn-primary {
+  background: #60A5FA;
+  color: white;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  text-decoration: none;
+  display: inline-block;
+}
+
+/* Fondo animado de burbujas */
+.bubble-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.bubble {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.07);
+  animation: float infinite ease-in-out;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-60px); }
+}
+
+.contenido-detalle {
+  position: relative;
+  z-index: 1;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="bubble-container" id="bubble-container"></div>
+
+<div class="contenido-detalle">
+  <h1>{{ contenido.titulo }}</h1>
+  
+  <div class="meta-info">
+    <span class="badge" style="background: #60A5FA;">{{ contenido.get_tipo_contenido_display }}</span>
+    <span class="badge" style="background: #4caf50;">{{ contenido.get_categoria_display }}</span>
+    <span class="badge" style="background: #ff9800;">Nivel {{ contenido.nivel_dificultad }}</span>
+    <span class="badge" style="background: #666;">{{ contenido.duracion_minutos }} minutos</span>
+    <span class="badge" style="background: #666;">{{ contenido.visualizaciones }} vistas</span>
+  </div>
+  
+  <p style="font-style: italic; opacity: 0.8;">{{ contenido.descripcion }}</p>
+  
+  <div class="contenido-body">
+    {% if contenido.tipo_contenido == 'video' %}
+      <iframe width="100%" height="400" src="{{ contenido.contenido }}" frameborder="0" allowfullscreen></iframe>
+    {% else %}
+      {{ contenido.contenido|markdown }}
+    {% endif %}
+  </div>
+  
+  {% if contenido.incluye_ejemplos_peru %}
+    <div style="background: rgba(76, 175, 80, 0.2); padding: 15px; border-radius: 8px; margin-top: 20px;">
+      <strong>✓ Este contenido incluye ejemplos contextualizados al Peru</strong>
+    </div>
+  {% endif %}
+  
+  <div style="margin-top: 30px;">
+    <a href="{% url 'biblioteca_educativa' %}" class="btn-primary">Volver a Biblioteca</a>
+    <a href="{% url 'dashboard' %}" class="btn-primary" style="background: #666; margin-left: 10px;">Dashboard</a>
+  </div>
+</div>
+
+<script>
+  const container = document.getElementById("bubble-container");
+  for (let i = 0; i < 20; i++) {
+    const bubble = document.createElement("div");
+    bubble.classList.add("bubble");
+    const size = Math.floor(Math.random() * 150) + 50;
+    bubble.style.width = `${size}px`;
+    bubble.style.height = `${size}px`;
+    bubble.style.top = `${Math.random() * 100}%`;
+    bubble.style.left = `${Math.random() * 100}%`;
+    bubble.style.animationDuration = `${(Math.random() * 1.5 + 3.5).toFixed(1)}s`;
+    container.appendChild(bubble);
+  }
+</script>
+{% endblock %}
+
+

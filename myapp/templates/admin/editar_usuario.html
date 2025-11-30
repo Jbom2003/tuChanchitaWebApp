@@ -1,0 +1,604 @@
+{% extends 'layout/base.html' %}
+{% load static %}
+{% block title %}Editar Usuario - Admin{% endblock %}
+
+{% block extra_css %}
+<style>
+.admin-container {
+  max-width: 1200px;
+  margin: 40px auto;
+  padding: 30px;
+  position: relative;
+  z-index: 1;
+}
+
+.form-section {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 25px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+}
+
+.form-section h3 {
+  color: #60A5FA;
+  margin-top: 0;
+  border-bottom: 2px solid rgba(96, 165, 250, 0.3);
+  padding-bottom: 10px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 15px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  color: white;
+  font-weight: bold;
+  font-size: 0.9em;
+}
+
+.form-group input[type="text"],
+.form-group input[type="email"],
+.form-group input[type="number"],
+.form-group input[type="datetime-local"],
+.form-group select {
+  width: 100%;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(30, 58, 138, 0.9);
+  color: white;
+  font-size: 16px;
+}
+
+.form-group input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  margin-right: 10px;
+}
+
+.btn-submit {
+  background: #60A5FA;
+  color: white;
+  padding: 12px 30px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  margin-right: 10px;
+}
+
+.btn-submit:hover {
+  background: #3B82F6;
+}
+
+.btn-cancel {
+  background: #666;
+  color: white;
+  padding: 12px 30px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.evaluacion-item {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  border-left: 4px solid #60A5FA;
+}
+
+.evaluacion-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.evaluacion-header h4 {
+  margin: 0;
+  color: #60A5FA;
+}
+
+.evaluacion-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+}
+
+.btn-delete {
+  background: #f44336;
+  color: white;
+  padding: 5px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.9em;
+}
+
+.btn-delete:hover {
+  background: #d32f2f;
+}
+
+/* Fondo animado de burbujas */
+.bubble-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.bubble {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.07);
+  animation: float infinite ease-in-out;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-60px); }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="bubble-container" id="bubble-container"></div>
+
+<div class="admin-container">
+  <h1 style="color: white; text-align: center; margin-bottom: 30px;">Editar Usuario: {{ usuario.email }}</h1>
+  
+  <form method="post">
+    {% csrf_token %}
+    
+    <div class="form-section">
+      <h3>Información Personal</h3>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Email:</label>
+          <input type="email" name="email" value="{{ usuario.email }}" required>
+        </div>
+        <div class="form-group">
+          <label>Nombre:</label>
+          <input type="text" name="first_name" value="{{ usuario.first_name }}" required>
+        </div>
+        <div class="form-group">
+          <label>Apellido:</label>
+          <input type="text" name="last_name" value="{{ usuario.last_name }}" required>
+        </div>
+        <div class="form-group">
+          <label>Intentos de Login:</label>
+          <input type="number" name="login_attempts" value="{{ usuario.login_attempts }}" min="0">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>
+          <input type="checkbox" name="is_blocked" {% if usuario.is_blocked %}checked{% endif %}>
+          Usuario Bloqueado
+        </label>
+      </div>
+    </div>
+    
+    <div class="form-section">
+      <h3>Configuración Financiera</h3>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Límite Mensual (S/.):</label>
+          <input type="number" name="monthly_limit" value="{{ usuario.monthly_limit }}" step="0.01" min="0">
+        </div>
+        <div class="form-group">
+          <label>Puntos:</label>
+          <input type="number" name="points" value="{{ usuario.points }}" min="0">
+        </div>
+        <div class="form-group">
+          <label>Puntaje Trivia:</label>
+          <input type="number" name="trivia_puntaje" value="{{ usuario.trivia_puntaje }}" min="0">
+        </div>
+      </div>
+    </div>
+    
+    <div class="form-section">
+      <h3>Métricas del Usuario</h3>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Fecha de Registro:</label>
+          <input type="datetime-local" name="fecha_registro" value="{{ metrics.fecha_registro|date:'Y-m-d\TH:i' }}">
+        </div>
+        <div class="form-group">
+          <label>Días Activos:</label>
+          <input type="number" name="dias_activos" value="{{ metrics.dias_activos }}" min="0">
+        </div>
+        <div class="form-group">
+          <label>Sesiones Totales:</label>
+          <input type="number" name="sesiones_totales" value="{{ metrics.sesiones_totales }}" min="0">
+        </div>
+        <div class="form-group">
+          <label>Puntaje Competencia Inicial:</label>
+          <input type="number" name="puntaje_competencia_inicial" value="{{ metrics.puntaje_competencia_inicial }}" min="0">
+        </div>
+        <div class="form-group">
+          <label>Puntaje Competencia Actual:</label>
+          <input type="number" name="puntaje_competencia_actual" value="{{ metrics.puntaje_competencia_actual }}" min="0">
+        </div>
+        <div class="form-group">
+          <label>Mejora Porcentual (%) - Calculado automáticamente:</label>
+          <input type="text" value="{{ metrics.mejora_porcentual|floatformat:1 }}%" readonly style="background: rgba(255,255,255,0.1); cursor: not-allowed;">
+          <small style="color: rgba(255,255,255,0.7); display: block; margin-top: 5px;">
+            Se calcula automáticamente: ((Última evaluación - Primera evaluación) / Primera evaluación) × 100
+            <br>
+            Primera evaluación: {{ metrics.puntaje_competencia_inicial }} puntos
+            <br>
+            Última evaluación: {{ metrics.puntaje_competencia_actual }} puntos
+          </small>
+        </div>
+        <div class="form-group">
+          <label>Gasto Promedio Mensual Inicial (S/.):</label>
+          <input type="number" name="gasto_promedio_mensual_inicial" value="{{ metrics.gasto_promedio_mensual_inicial }}" step="0.01" min="0">
+        </div>
+        <div class="form-group">
+          <label>Gasto Promedio Mensual Actual (S/.):</label>
+          <input type="number" name="gasto_promedio_mensual_actual" value="{{ metrics.gasto_promedio_mensual_actual }}" step="0.01" min="0">
+        </div>
+        <div class="form-group">
+          <label>Reducción de Gasto (%):</label>
+          <input type="number" name="reduccion_gasto" value="{{ metrics.reduccion_gasto }}" step="0.1">
+        </div>
+        <div class="form-group">
+          <label>Ahorro Promedio Mensual Inicial (S/.):</label>
+          <input type="number" name="ahorro_promedio_mensual_inicial" value="{{ metrics.ahorro_promedio_mensual_inicial }}" step="0.01" min="0">
+        </div>
+        <div class="form-group">
+          <label>Ahorro Promedio Mensual Actual (S/.):</label>
+          <input type="number" name="ahorro_promedio_mensual_actual" value="{{ metrics.ahorro_promedio_mensual_actual }}" step="0.01" min="0">
+        </div>
+        <div class="form-group">
+          <label>Aumento de Ahorro (%):</label>
+          <input type="number" name="aumento_ahorro" value="{{ metrics.aumento_ahorro }}" step="0.1">
+        </div>
+        <div class="form-group">
+          <label>Puntos Totales:</label>
+          <input type="number" name="puntos_totales" value="{{ metrics.puntos_totales }}" min="0">
+        </div>
+        <div class="form-group">
+          <label>Retos Completados:</label>
+          <input type="number" name="retos_completados" value="{{ metrics.retos_completados }}" min="0">
+        </div>
+        <div class="form-group">
+          <label>Trivias Completadas:</label>
+          <input type="number" name="trivias_completadas" value="{{ metrics.trivias_completadas }}" min="0">
+        </div>
+        <div class="form-group">
+          <label>Nivel Actual:</label>
+          <input type="number" name="nivel_actual" value="{{ metrics.nivel_actual }}" min="1">
+        </div>
+      </div>
+    </div>
+    
+    {% if evaluaciones_con_correctas %}
+    <div class="form-section">
+      <h3>Evaluaciones ({{ evaluaciones_con_correctas|length }})</h3>
+      {% for eval_data in evaluaciones_con_correctas %}
+      {% with eval=eval_data.eval %}
+      <div class="evaluacion-item">
+        <div class="evaluacion-header">
+          <h4>Evaluación {{ eval.numero_evaluacion }}</h4>
+        </div>
+        <div class="evaluacion-fields">
+          <div class="form-group">
+            <label>Número de Evaluación:</label>
+            <input type="number" name="eval_{{ eval.id }}_numero" value="{{ eval.numero_evaluacion }}" min="1">
+          </div>
+          <div class="form-group">
+            <label>Fecha de Evaluación:</label>
+            <input type="datetime-local" name="eval_{{ eval.id }}_fecha" value="{{ eval.fecha_evaluacion|date:'Y-m-d\TH:i' }}">
+          </div>
+          <div class="form-group">
+            <label>Puntaje Total (calculado automáticamente):</label>
+            <input type="text" value="{{ eval.puntaje_total }}" readonly style="background: rgba(255,255,255,0.1); cursor: not-allowed;">
+            <small style="color: rgba(255,255,255,0.7);">Se recalcula automáticamente al guardar</small>
+          </div>
+          <div class="form-group">
+            <label>Nivel de Competencia:</label>
+            <select name="eval_{{ eval.id }}_nivel">
+              <option value="bajo" {% if eval.nivel_competencia == 'bajo' %}selected{% endif %}>Bajo</option>
+              <option value="medio" {% if eval.nivel_competencia == 'medio' %}selected{% endif %}>Medio</option>
+              <option value="alto" {% if eval.nivel_competencia == 'alto' %}selected{% endif %}>Alto</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Presupuesto - Respuestas Correctas (0-10):</label>
+            <input type="number" name="eval_{{ eval.id }}_presupuesto_correctas" 
+                   id="presupuesto_correctas_{{ eval.id }}"
+                   value="{{ eval_data.presupuesto_correctas }}" 
+                   min="0" max="10" 
+                   onchange="calcularPuntaje(this, 'presupuesto_{{ eval.id }}')">
+            <small style="color: rgba(255,255,255,0.7);">Puntaje calculado: <span id="presupuesto_{{ eval.id }}">{{ eval.conocimiento_presupuesto }}</span>/5</small>
+          </div>
+          <div class="form-group">
+            <label>Ahorro - Respuestas Correctas (0-10):</label>
+            <input type="number" name="eval_{{ eval.id }}_ahorro_correctas" 
+                   id="ahorro_correctas_{{ eval.id }}"
+                   value="{{ eval_data.ahorro_correctas }}" 
+                   min="0" max="10"
+                   onchange="calcularPuntaje(this, 'ahorro_{{ eval.id }}')">
+            <small style="color: rgba(255,255,255,0.7);">Puntaje calculado: <span id="ahorro_{{ eval.id }}">{{ eval.conocimiento_ahorro }}</span>/5</small>
+          </div>
+          <div class="form-group">
+            <label>Crédito - Respuestas Correctas (0-10):</label>
+            <input type="number" name="eval_{{ eval.id }}_credito_correctas" 
+                   id="credito_correctas_{{ eval.id }}"
+                   value="{{ eval_data.credito_correctas }}" 
+                   min="0" max="10"
+                   onchange="calcularPuntaje(this, 'credito_{{ eval.id }}')">
+            <small style="color: rgba(255,255,255,0.7);">Puntaje calculado: <span id="credito_{{ eval.id }}">{{ eval.conocimiento_credito }}</span>/5</small>
+          </div>
+          <div class="form-group">
+            <label>Inversiones - Respuestas Correctas (0-10):</label>
+            <input type="number" name="eval_{{ eval.id }}_inversiones_correctas" 
+                   id="inversiones_correctas_{{ eval.id }}"
+                   value="{{ eval_data.inversiones_correctas }}" 
+                   min="0" max="10"
+                   onchange="calcularPuntaje(this, 'inversiones_{{ eval.id }}')">
+            <small style="color: rgba(255,255,255,0.7);">Puntaje calculado: <span id="inversiones_{{ eval.id }}">{{ eval.conocimiento_inversiones }}</span>/5</small>
+          </div>
+          <div class="form-group">
+            <label>Fraudes - Respuestas Correctas (0-10):</label>
+            <input type="number" name="eval_{{ eval.id }}_fraudes_correctas" 
+                   id="fraudes_correctas_{{ eval.id }}"
+                   value="{{ eval_data.fraudes_correctas }}" 
+                   min="0" max="10"
+                   onchange="calcularPuntaje(this, 'fraudes_{{ eval.id }}')">
+            <small style="color: rgba(255,255,255,0.7);">Puntaje calculado: <span id="fraudes_{{ eval.id }}">{{ eval.conocimiento_fraudes }}</span>/5</small>
+          </div>
+          <div style="background: rgba(96, 165, 250, 0.1); padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #60A5FA;">
+            <h4 style="margin-top: 0; color: #60A5FA;">📚 Brecha Teórico-Práctica</h4>
+            <p style="color: rgba(255,255,255,0.8); font-size: 0.9em; margin-bottom: 15px;">
+              Mide la diferencia entre conocimiento teórico y aplicación práctica. 
+              <strong>Brecha = Teórico - Práctico</strong>. Ideal: 0 (equilibrio).
+            </p>
+            <div class="form-group">
+              <label>Conocimiento Teórico - Respuestas Correctas (0-5):</label>
+              <input type="number" name="eval_{{ eval.id }}_teorico_correctas" 
+                     id="teorico_correctas_{{ eval.id }}"
+                     value="{{ eval_data.teorico_correctas }}" 
+                     min="0" max="5"
+                     onchange="calcularPuntajeBrecha(this, 'teorico_{{ eval.id }}'); actualizarBrecha({{ eval.id }})">
+              <small style="color: rgba(255,255,255,0.7);">Puntaje calculado: <span id="teorico_{{ eval.id }}">{{ eval.conocimiento_teorico }}</span>/5</small>
+            </div>
+            <div class="form-group">
+              <label>Aplicación Práctica - Respuestas Correctas (0-5):</label>
+              <input type="number" name="eval_{{ eval.id }}_practico_correctas" 
+                     id="practico_correctas_{{ eval.id }}"
+                     value="{{ eval_data.practico_correctas }}" 
+                     min="0" max="5"
+                     onchange="calcularPuntajeBrecha(this, 'practico_{{ eval.id }}'); actualizarBrecha({{ eval.id }})">
+              <small style="color: rgba(255,255,255,0.7);">Puntaje calculado: <span id="practico_{{ eval.id }}">{{ eval.aplicacion_practica }}</span>/5</small>
+            </div>
+            <div style="margin-top: 10px; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 5px;">
+              <strong style="color: #fff;">Brecha calculada:</strong>
+              <span id="brecha_{{ eval.id }}" style="font-weight: bold; font-size: 1.1em; color: {% if eval.calcular_brecha_teorico_practica > 0 %}#EA580C{% elif eval.calcular_brecha_teorico_practica < 0 %}#F59E0B{% else %}#15803D{% endif %};">
+                {% if eval.calcular_brecha_teorico_practica > 0 %}+{{ eval.calcular_brecha_teorico_practica }}{% else %}{{ eval.calcular_brecha_teorico_practica }}{% endif %}
+              </span>
+              <span style="font-size: 0.85em; color: rgba(255,255,255,0.7); margin-left: 5px;">
+                {% if eval.calcular_brecha_teorico_practica > 0 %}(sabes más de lo que aplicas)
+                {% elif eval.calcular_brecha_teorico_practica < 0 %}(aplicas más de lo que sabes)
+                {% else %}(equilibrio ideal){% endif %}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endwith %}
+      {% endfor %}
+    </div>
+    {% endif %}
+    
+    <!-- Gastos -->
+    {% if gastos %}
+    <div class="form-section">
+      <h3>Gastos ({{ gastos|length }})</h3>
+      <p style="color: rgba(255,255,255,0.7); font-size: 0.9em; margin-bottom: 15px;">
+        Últimos 50 gastos registrados. Puedes editar el monto, categoría, tienda y fecha.
+      </p>
+      <div style="max-height: 400px; overflow-y: auto; display: grid; gap: 10px;">
+        {% for gasto in gastos %}
+        <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; border-left: 3px solid #60A5FA;">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">
+            <div class="form-group" style="margin: 0;">
+              <label style="font-size: 0.85em;">Monto (S/.):</label>
+              <input type="number" name="gasto_{{ gasto.id }}_amount" value="{{ gasto.amount }}" step="0.01" min="0" style="width: 100%;">
+            </div>
+            <div class="form-group" style="margin: 0;">
+              <label style="font-size: 0.85em;">Categoría:</label>
+              <select name="gasto_{{ gasto.id }}_category" style="width: 100%;">
+                <option value="Comida" {% if gasto.category == 'Comida' %}selected{% endif %}>Comida</option>
+                <option value="Educación" {% if gasto.category == 'Educación' %}selected{% endif %}>Educación</option>
+                <option value="Ropa" {% if gasto.category == 'Ropa' %}selected{% endif %}>Ropa</option>
+                <option value="Otros" {% if gasto.category == 'Otros' %}selected{% endif %}>Otros</option>
+                <option value="Ahorro" {% if gasto.category == 'Ahorro' %}selected{% endif %}>Ahorro</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin: 0;">
+              <label style="font-size: 0.85em;">Tienda:</label>
+              <input type="text" name="gasto_{{ gasto.id }}_store_name" value="{{ gasto.store_name }}" style="width: 100%;">
+            </div>
+            <div class="form-group" style="margin: 0;">
+              <label style="font-size: 0.85em;">Fecha:</label>
+              <input type="datetime-local" name="gasto_{{ gasto.id }}_date" value="{{ gasto.date|date:'Y-m-d\TH:i' }}" style="width: 100%;">
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+    
+    <!-- Retos Completados -->
+    {% if retos %}
+    <div class="form-section">
+      <h3>Retos ({{ retos|length }})</h3>
+      <p style="color: rgba(255,255,255,0.7); font-size: 0.9em; margin-bottom: 15px;">
+        Retos del usuario. Puedes marcar como completados, fallidos y modificar puntos ganados.
+      </p>
+      <div style="max-height: 400px; overflow-y: auto; display: grid; gap: 10px;">
+        {% for reto in retos %}
+        <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; border-left: 3px solid #4CAF50;">
+          <div style="margin-bottom: 10px;">
+            <strong style="color: #fff;">{{ reto.challenge.title }}</strong>
+            <p style="color: rgba(255,255,255,0.7); font-size: 0.85em; margin: 5px 0;">{{ reto.challenge.description }}</p>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">
+            <div class="form-group" style="margin: 0;">
+              <label style="font-size: 0.85em;">
+                <input type="checkbox" name="reto_{{ reto.id }}_completed" {% if reto.completed %}checked{% endif %}>
+                Completado
+              </label>
+            </div>
+            <div class="form-group" style="margin: 0;">
+              <label style="font-size: 0.85em;">
+                <input type="checkbox" name="reto_{{ reto.id }}_failed" {% if reto.failed %}checked{% endif %}>
+                Fallido
+              </label>
+            </div>
+            <div class="form-group" style="margin: 0;">
+              <label style="font-size: 0.85em;">Puntos Ganados:</label>
+              <input type="number" name="reto_{{ reto.id }}_earned_points" value="{{ reto.earned_points }}" min="0" style="width: 100%;">
+            </div>
+            <div class="form-group" style="margin: 0;">
+              <label style="font-size: 0.85em;">Fecha Inicio:</label>
+              <input type="datetime-local" name="reto_{{ reto.id }}_start_date" value="{{ reto.start_date|date:'Y-m-d\TH:i' }}" style="width: 100%;">
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+    
+    <!-- Puntajes de Juegos -->
+    <div class="form-section">
+      <h3>Puntajes de Juegos</h3>
+      
+      <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 8px; margin-bottom: 15px;">
+        <h4 style="margin-top: 0; color: #60A5FA;">Trivia Financiera</h4>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+          <div class="form-group">
+            <label>Puntaje Total:</label>
+            <input type="number" name="trivia_puntaje_total" value="{{ puntaje_trivia.puntaje_total }}" min="0">
+          </div>
+          <div class="form-group">
+            <label>Intentos Fallidos:</label>
+            <input type="number" name="trivia_intentos" value="{{ puntaje_trivia.intentos }}" min="0">
+          </div>
+        </div>
+      </div>
+      
+      <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 8px;">
+        <h4 style="margin-top: 0; color: #FF9800;">Completar Frases</h4>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+          <div class="form-group">
+            <label>Puntaje Total:</label>
+            <input type="number" name="completar_puntaje_total" value="{{ puntaje_completar.puntaje_total }}" min="0">
+          </div>
+          <div class="form-group">
+            <label>Frases Completadas:</label>
+            <input type="number" name="completar_frases_completadas" value="{{ puntaje_completar.frases_completadas }}" min="0">
+          </div>
+          <div class="form-group">
+            <label>Respuestas Correctas:</label>
+            <input type="number" name="completar_respuestas_correctas" value="{{ puntaje_completar.respuestas_correctas }}" min="0">
+          </div>
+          <div class="form-group">
+            <label>Respuestas Parciales:</label>
+            <input type="number" name="completar_respuestas_parciales" value="{{ puntaje_completar.respuestas_parciales }}" min="0">
+          </div>
+          <div class="form-group">
+            <label>Respuestas Incorrectas:</label>
+            <input type="number" name="completar_respuestas_incorrectas" value="{{ puntaje_completar.respuestas_incorrectas }}" min="0">
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div style="text-align: center; margin-top: 30px;">
+      <button type="submit" class="btn-submit">Guardar Cambios</button>
+      <a href="{% url 'admin_dashboard' %}" class="btn-cancel">Volver al Dashboard</a>
+    </div>
+  </form>
+</div>
+
+<script>
+  const container = document.getElementById("bubble-container");
+  for (let i = 0; i < 20; i++) {
+    const bubble = document.createElement("div");
+    bubble.classList.add("bubble");
+    const size = Math.floor(Math.random() * 150) + 50;
+    bubble.style.width = `${size}px`;
+    bubble.style.height = `${size}px`;
+    bubble.style.top = `${Math.random() * 100}%`;
+    bubble.style.left = `${Math.random() * 100}%`;
+    bubble.style.animationDuration = `${(Math.random() * 1.5 + 3.5).toFixed(1)}s`;
+    container.appendChild(bubble);
+  }
+
+  // Función para calcular puntaje basado en respuestas correctas (0-10 preguntas)
+  function calcularPuntaje(input, spanId) {
+    const correctas = parseInt(input.value) || 0;
+    const total = 10; // 10 preguntas por categoría
+    const puntaje = 1 + Math.floor((correctas / total) * 4);
+    const puntajeFinal = Math.min(5, Math.max(1, puntaje));
+    document.getElementById(spanId).textContent = puntajeFinal;
+  }
+
+  // Función para calcular puntaje de brecha (0-5 preguntas)
+  function calcularPuntajeBrecha(input, spanId) {
+    const correctas = parseInt(input.value) || 0;
+    const total = 5; // 5 preguntas para brecha
+    const puntaje = 1 + Math.floor((correctas / total) * 4);
+    const puntajeFinal = Math.min(5, Math.max(1, puntaje));
+    document.getElementById(spanId).textContent = puntajeFinal;
+  }
+
+  // Función para actualizar la brecha en tiempo real
+  function actualizarBrecha(evalId) {
+    const teorico = parseInt(document.getElementById('teorico_' + evalId).textContent) || 0;
+    const practico = parseInt(document.getElementById('practico_' + evalId).textContent) || 0;
+    const brecha = teorico - practico;
+    
+    const brechaElement = document.getElementById('brecha_' + evalId);
+    if (brechaElement) {
+      brechaElement.textContent = brecha > 0 ? '+' + brecha : brecha;
+      brechaElement.style.color = brecha > 0 ? '#EA580C' : (brecha < 0 ? '#F59E0B' : '#15803D');
+      
+      // Actualizar texto explicativo
+      const explicacion = brechaElement.nextElementSibling;
+      if (explicacion) {
+        if (brecha > 0) {
+          explicacion.textContent = '(sabes más de lo que aplicas)';
+        } else if (brecha < 0) {
+          explicacion.textContent = '(aplicas más de lo que sabes)';
+        } else {
+          explicacion.textContent = '(equilibrio ideal)';
+        }
+      }
+    }
+  }
+</script>
+{% endblock %}

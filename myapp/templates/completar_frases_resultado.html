@@ -1,0 +1,145 @@
+{% extends 'layout/base.html' %}
+{% load static %}
+{% block title %}Resultado - Completar Frases{% endblock %}
+
+{% block extra_css %}
+<style>
+.resultado-container {
+  max-width: 600px;
+  margin: 50px auto;
+  padding: 40px;
+  background: rgba(255, 255, 255, 0.07);
+  border-radius: 15px;
+  text-align: center;
+}
+
+.resultado-container h2 {
+  margin-bottom: 30px;
+}
+
+.puntos-finales {
+  font-size: 48px;
+  font-weight: bold;
+  color: #60A5FA;
+  margin: 30px 0;
+}
+
+.btn-container {
+  margin-top: 30px;
+}
+
+.btn-primary {
+  background: #60A5FA;
+  color: white;
+  padding: 15px 30px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  margin: 10px;
+}
+
+.btn-primary:hover {
+  background: #3B82F6;
+}
+
+.btn-secondary {
+  background: rgba(96, 165, 250, 0.3);
+  color: white;
+  padding: 15px 30px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  margin: 10px;
+}
+
+.btn-secondary:hover {
+  background: rgba(96, 165, 250, 0.5);
+}
+
+/* Fondo animado de burbujas */
+.bubble-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.bubble {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.07);
+  animation: float infinite ease-in-out;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-60px); }
+}
+
+.resultado-container {
+  position: relative;
+  z-index: 1;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="bubble-container" id="bubble-container"></div>
+
+<div class="resultado-container">
+  <h2>🎮 Juego Finalizado</h2>
+  
+  <div class="puntos-finales">
+    {{ puntos }} puntos
+  </div>
+  
+  <p style="font-size: 18px; margin-bottom: 30px;">{{ mensaje }}</p>
+  
+  <div class="btn-container">
+    <a href="{% url 'completar_frases' %}" class="btn-primary">Jugar de Nuevo</a>
+    <a href="{% url 'juegos' %}" class="btn-secondary">Volver a Juegos</a>
+    <a href="{% url 'completar_frases_ranking' %}" class="btn-secondary">Ver Ranking</a>
+  </div>
+</div>
+
+{% if resultado_audio %}
+  <audio id="sound-{{ resultado_audio }}" preload="auto">
+    <source src="{% static 'sounds/' %}{{ resultado_audio }}.mp3" type="audio/mpeg">
+  </audio>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const audio = document.getElementById('sound-{{ resultado_audio }}');
+      if (audio) {
+        audio.volume = 0.25;
+        audio.play().catch(e => console.log('Error reproduciendo audio:', e));
+      }
+    });
+  </script>
+{% endif %}
+
+<script>
+  const container = document.getElementById("bubble-container");
+  for (let i = 0; i < 20; i++) {
+    const bubble = document.createElement("div");
+    bubble.classList.add("bubble");
+    const size = Math.floor(Math.random() * 150) + 50;
+    bubble.style.width = `${size}px`;
+    bubble.style.height = `${size}px`;
+    bubble.style.top = `${Math.random() * 100}%`;
+    bubble.style.left = `${Math.random() * 100}%`;
+    bubble.style.animationDuration = `${(Math.random() * 1.5 + 3.5).toFixed(1)}s`;
+    container.appendChild(bubble);
+  }
+</script>
+{% endblock %}
+

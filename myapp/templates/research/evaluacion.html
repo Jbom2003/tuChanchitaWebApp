@@ -1,0 +1,298 @@
+{% extends 'layout/base.html' %}
+{% load static %}
+{% block title %}Evaluación - TuChanchita{% endblock %}
+
+{% block extra_css %}
+<style>
+.evaluacion-container {
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 30px;
+  background: rgba(255, 255, 255, 0.07);
+  border-radius: 15px;
+  position: relative;
+  z-index: 1;
+}
+
+.evaluacion-container h2 {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.categoria-section {
+  margin-bottom: 40px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+}
+
+.categoria-section h3 {
+  color: #60A5FA;
+  margin-bottom: 20px;
+  border-bottom: 2px solid rgba(96, 165, 250, 0.3);
+  padding-bottom: 10px;
+}
+
+.pregunta-item {
+  margin-bottom: 25px;
+  padding: 15px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+  border-left: 4px solid #60A5FA;
+}
+
+.pregunta-item .pregunta-texto {
+  font-weight: bold;
+  margin-bottom: 15px;
+  color: #fff;
+}
+
+.pregunta-item .opciones {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pregunta-item .opcion {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.pregunta-item .opcion:hover {
+  background: rgba(96, 165, 250, 0.2);
+}
+
+.pregunta-item .opcion input[type="radio"] {
+  margin-right: 10px;
+  cursor: pointer;
+}
+
+.pregunta-item .opcion label {
+  cursor: pointer;
+  color: #fff;
+  flex: 1;
+}
+
+.btn-submit {
+  background: #60A5FA;
+  color: white;
+  padding: 15px 40px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1em;
+  cursor: pointer;
+  display: block;
+  margin: 40px auto;
+  transition: background 0.3s;
+}
+
+.btn-submit:hover {
+  background: #3B82F6;
+}
+
+/* Fondo animado de burbujas */
+.bubble-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.bubble {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.07);
+  animation: float infinite ease-in-out;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-60px); }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="bubble-container" id="bubble-container"></div>
+
+<div class="evaluacion-container">
+  <h2>Evaluación de Competencias Financieras</h2>
+  <p style="text-align: center; color: rgba(255,255,255,0.8); margin-bottom: 30px;">
+    Responde todas las preguntas para evaluar tus competencias financieras. Puedes tomar esta evaluación cuantas veces quieras.
+  </p>
+  
+  <form method="post" id="evaluacion-form">
+    {% csrf_token %}
+    
+    {% for categoria, preguntas in preguntas_evaluacion.items %}
+      <div class="categoria-section">
+        <h3>
+          {% if categoria == 'presupuesto' %}Presupuestos
+          {% elif categoria == 'ahorro' %}Ahorro
+          {% elif categoria == 'credito' %}Crédito
+          {% elif categoria == 'inversiones' %}Inversiones
+          {% elif categoria == 'fraudes' %}Fraudes Digitales
+          {% else %}{{ categoria|title }}
+          {% endif %}
+        </h3>
+        
+        {% for pregunta in preguntas %}
+          <div class="pregunta-item">
+            <div class="pregunta-texto">{{ forloop.counter }}. {{ pregunta.pregunta }}</div>
+            <div class="opciones">
+              {% for opcion_key, opcion_texto in pregunta.opciones.items %}
+                <div class="opcion">
+                  <input type="radio" 
+                         name="pregunta_{{ categoria }}_{{ forloop.parentloop.counter0 }}" 
+                         id="pregunta_{{ categoria }}_{{ forloop.parentloop.counter0 }}_{{ opcion_key }}"
+                         value="{{ opcion_key }}" 
+                         required>
+                  <label for="pregunta_{{ categoria }}_{{ forloop.parentloop.counter0 }}_{{ opcion_key }}">
+                    {{ opcion_key }}. {{ opcion_texto }}
+                  </label>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% endfor %}
+    
+    <!-- Brecha Teórico-Práctica -->
+    {% if preguntas_brecha.teorico %}
+      <div class="categoria-section" style="border: 2px solid #60A5FA; background: rgba(96, 165, 250, 0.1);">
+        <div style="background: rgba(96, 165, 250, 0.2); padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+          <h3 style="margin-top: 0; color: #60A5FA;">📚 Brecha Teórico-Práctica</h3>
+          <p style="color: rgba(255,255,255,0.9); line-height: 1.6; margin: 0;">
+            Esta sección mide la diferencia entre lo que <strong>sabes</strong> sobre finanzas (conocimiento teórico) 
+            y lo que <strong>aplicas</strong> en tu vida diaria (aplicación práctica). 
+            <br><br>
+            <strong>¿Por qué es importante?</strong> Un equilibrio entre teoría y práctica es ideal. 
+            Si sabes mucho pero no lo aplicas, o si aplicas sin entender bien la teoría, hay una brecha que podemos trabajar.
+            <br><br>
+            <strong>Ejemplo:</strong> Si tu conocimiento teórico es 5/5 pero tu aplicación práctica es 2/5, 
+            la brecha es +3 (sabes más de lo que aplicas). El objetivo es tener una brecha cercana a 0.
+          </p>
+        </div>
+        
+        <div style="margin-top: 20px;">
+          <h3 style="color: #4CAF50;">Conocimiento Teórico</h3>
+          <p style="color: rgba(255,255,255,0.7); font-size: 0.9em; margin-bottom: 15px;">
+            Estas preguntas evalúan tu conocimiento sobre conceptos financieros básicos.
+          </p>
+        {% for pregunta in preguntas_brecha.teorico %}
+          <div class="pregunta-item">
+            <div class="pregunta-texto">{{ forloop.counter }}. {{ pregunta.pregunta }}</div>
+            <div class="opciones">
+              {% for opcion_key, opcion_texto in pregunta.opciones.items %}
+                <div class="opcion">
+                  <input type="radio" 
+                         name="brecha_teorico_{{ forloop.parentloop.counter0 }}" 
+                         id="brecha_teorico_{{ forloop.parentloop.counter0 }}_{{ opcion_key }}"
+                         value="{{ opcion_key }}" 
+                         required>
+                  <label for="brecha_teorico_{{ forloop.parentloop.counter0 }}_{{ opcion_key }}">
+                    {{ opcion_key }}. {{ opcion_texto }}
+                  </label>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+    
+    {% if preguntas_brecha.practico %}
+      <div class="categoria-section" style="border: 2px solid #FF9800; background: rgba(255, 152, 0, 0.1);">
+        <h3 style="color: #FF9800;">⚙️ Aplicación Práctica</h3>
+        <p style="color: rgba(255,255,255,0.7); font-size: 0.9em; margin-bottom: 15px;">
+          Estas preguntas evalúan cómo aplicas tus conocimientos financieros en situaciones reales de tu vida diaria.
+        </p>
+        {% for pregunta in preguntas_brecha.practico %}
+          <div class="pregunta-item">
+            <div class="pregunta-texto">{{ forloop.counter }}. {{ pregunta.pregunta }}</div>
+            <div class="opciones">
+              {% for opcion_key, opcion_texto in pregunta.opciones.items %}
+                <div class="opcion">
+                  <input type="radio" 
+                         name="brecha_practico_{{ forloop.parentloop.counter0 }}" 
+                         id="brecha_practico_{{ forloop.parentloop.counter0 }}_{{ opcion_key }}"
+                         value="{{ opcion_key }}" 
+                         required>
+                  <label for="brecha_practico_{{ forloop.parentloop.counter0 }}_{{ opcion_key }}">
+                    {{ opcion_key }}. {{ opcion_texto }}
+                  </label>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+    
+    <!-- Información Adicional -->
+    <div class="categoria-section">
+      <h3>Información Adicional</h3>
+      
+      <div class="pregunta-item">
+        <label style="color: #fff; font-weight: bold; display: block; margin-bottom: 10px;">
+          <input type="checkbox" name="tiene_tarjetas_credito" style="margin-right: 10px;">
+          ¿Tienes tarjetas de crédito?
+        </label>
+        
+        <label style="color: rgba(255,255,255,0.8); display: block; margin-top: 15px; margin-bottom: 5px;">
+          Cantidad de tarjetas:
+        </label>
+        <input type="number" name="cantidad_tarjetas" min="0" value="0" 
+               style="padding: 8px; border-radius: 5px; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.1); color: #fff; width: 100px;">
+        
+        <label style="color: rgba(255,255,255,0.8); display: block; margin-top: 15px; margin-bottom: 5px;">
+          Monto de deuda actual (S/.):
+        </label>
+        <input type="number" name="monto_deuda_actual" min="0" step="0.01" value="0" 
+               style="padding: 8px; border-radius: 5px; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.1); color: #fff; width: 200px;">
+        
+        <label style="color: rgba(255,255,255,0.8); display: block; margin-top: 15px; margin-bottom: 5px;">
+          Frecuencia de pago mínimo (veces al año):
+        </label>
+        <input type="number" name="frecuencia_pago_minimo" min="0" value="0" 
+               style="padding: 8px; border-radius: 5px; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.1); color: #fff; width: 100px;">
+      </div>
+      
+      <div class="pregunta-item">
+        <label style="color: #fff; font-weight: bold; display: block;">
+          <input type="checkbox" name="experiencia_fraude" style="margin-right: 10px;">
+          ¿Has tenido experiencia con fraudes digitales?
+        </label>
+      </div>
+    </div>
+    
+    <button type="submit" class="btn-submit">Enviar Evaluación</button>
+  </form>
+</div>
+
+<script>
+  const container = document.getElementById("bubble-container");
+  for (let i = 0; i < 20; i++) {
+    const bubble = document.createElement("div");
+    bubble.classList.add("bubble");
+    const size = Math.floor(Math.random() * 150) + 50;
+    bubble.style.width = `${size}px`;
+    bubble.style.height = `${size}px`;
+    bubble.style.top = `${Math.random() * 100}%`;
+    bubble.style.left = `${Math.random() * 100}%`;
+    bubble.style.animationDuration = `${(Math.random() * 1.5 + 3.5).toFixed(1)}s`;
+    container.appendChild(bubble);
+  }
+</script>
+{% endblock %}
+

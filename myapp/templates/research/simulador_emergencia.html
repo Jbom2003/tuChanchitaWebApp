@@ -1,0 +1,113 @@
+{% extends 'layout/base.html' %}
+{% load static %}
+{% block title %}Simulador de Emergencias - TuChanchita{% endblock %}
+
+{% block extra_css %}
+<style>
+.simulador-container {
+  max-width: 700px;
+  margin: 40px auto;
+  padding: 30px;
+  background: rgba(255, 255, 255, 0.07);
+  border-radius: 15px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: bold;
+}
+
+.form-group input, .form-group select {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(30, 58, 138, 0.9);
+  color: white;
+  font-size: 16px;
+}
+
+.form-group select {
+  background: rgba(30, 58, 138, 0.9);
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='white' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 35px;
+}
+
+.form-group select option {
+  background: #1E3A8A;
+  color: white;
+  padding: 10px;
+}
+
+.btn-submit {
+  width: 100%;
+  padding: 15px;
+  background: #60A5FA;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.info-box {
+  background: rgba(96, 165, 250, 0.2);
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="simulador-container">
+  <h2>Simulador de Emergencias Financieras</h2>
+  
+  <div class="info-box">
+    <p>Simula diferentes escenarios de emergencia para evaluar si tienes un fondo suficiente. Se recomienda tener un fondo equivalente a 6 meses de gastos.</p>
+  </div>
+  
+  <form method="post">
+    {% csrf_token %}
+    
+    <div class="form-group">
+      <label>{{ form.escenario.label }}</label>
+      {{ form.escenario }}
+    </div>
+    
+    <div class="form-group">
+      <label>{{ form.monto_emergencia.label }} (S/.)</label>
+      {{ form.monto_emergencia }}
+    </div>
+    
+    <div class="form-group">
+      <label>{{ form.fondo_emergencia_actual.label }} (S/.)</label>
+      {{ form.fondo_emergencia_actual }}
+    </div>
+    
+    <div class="form-group">
+      <label>{{ form.ingresos_mensuales.label }} (S/.)</label>
+      {{ form.ingresos_mensuales }}
+    </div>
+    
+    {% if form.errors %}
+      <div style="color: red; margin-bottom: 20px;">
+        {{ form.errors }}
+      </div>
+    {% endif %}
+    
+    <button type="submit" class="btn-submit">Calcular Simulacion</button>
+  </form>
+</div>
+{% endblock %}
+

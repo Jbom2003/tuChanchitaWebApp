@@ -1,0 +1,110 @@
+{% extends 'layout/base.html' %}
+{% load static %}
+{% block title %}Resultado Simulacion Emergencia - TuChanchita{% endblock %}
+
+{% block extra_css %}
+<style>
+.resultado-container {
+  max-width: 800px;
+  margin: 40px auto;
+  padding: 30px;
+  background: rgba(255, 255, 255, 0.07);
+  border-radius: 15px;
+}
+
+.resultado-box {
+  background: rgba(96, 165, 250, 0.2);
+  padding: 25px;
+  border-radius: 10px;
+  margin-bottom: 25px;
+}
+
+.protegido-bien { border-left: 5px solid #4caf50; }
+.protegido-poco { border-left: 5px solid #ff9800; }
+.protegido-no { border-left: 5px solid #f44336; }
+
+.detalle-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 15px;
+  margin: 20px 0;
+}
+
+.detalle-item {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 15px;
+  border-radius: 8px;
+}
+
+.plan-box {
+  background: rgba(76, 175, 80, 0.2);
+  padding: 20px;
+  border-radius: 8px;
+  white-space: pre-line;
+  margin-top: 20px;
+}
+
+.btn-primary {
+  background: #60A5FA;
+  color: white;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  text-decoration: none;
+  display: inline-block;
+  margin-top: 20px;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="resultado-container">
+  <h2>Resultado de la Simulacion de Emergencia</h2>
+  
+  <div class="resultado-box {% if simulator.meses_protegido >= 6 %}protegido-bien{% elif simulator.meses_protegido >= 3 %}protegido-poco{% else %}protegido-no{% endif %}">
+    <h3>Escenario: {{ simulator.get_escenario_display }}</h3>
+    <p style="font-size: 24px; font-weight: bold;">Meses Protegido: {{ simulator.meses_protegido }}</p>
+    {% if simulator.meses_protegido >= 6 %}
+      <p style="color: #4caf50;">¡Excelente! Tienes un fondo de emergencia adecuado.</p>
+    {% elif simulator.meses_protegido >= 3 %}
+      <p style="color: #ff9800;">Tienes proteccion moderada. Intenta llegar a 6 meses.</p>
+    {% else %}
+      <p style="color: #f44336;">Tu fondo de emergencia es insuficiente. Necesitas ahorrar mas.</p>
+    {% endif %}
+  </div>
+  
+  <h3>Detalles:</h3>
+  <div class="detalle-grid">
+    <div class="detalle-item">
+      <strong>Monto de Emergencia:</strong><br>
+      S/. {{ simulator.monto_emergencia|floatformat:2 }}
+    </div>
+    <div class="detalle-item">
+      <strong>Fondo Actual:</strong><br>
+      S/. {{ simulator.fondo_emergencia_actual|floatformat:2 }}
+    </div>
+    <div class="detalle-item">
+      <strong>Fondo Ideal (6 meses):</strong><br>
+      S/. {{ fondo_ideal|floatformat:2 }}
+    </div>
+    <div class="detalle-item">
+      <strong>Deficit:</strong><br>
+      S/. {{ simulator.deficit_fondo|floatformat:2 }}
+    </div>
+  </div>
+  
+  <div class="plan-box">
+    <h4>Plan de Ahorro para Fondo de Emergencia:</h4>
+    {{ simulator.plan_ahorro_emergencia }}
+  </div>
+  
+  <div style="margin-top: 30px; text-align: center;">
+    <a href="{% url 'simulador_emergencia' %}" class="btn-primary">Nueva Simulacion</a>
+    <a href="{% url 'retos' %}" class="btn-primary" style="background: #4caf50; margin-left: 10px;">Crear Reto de Ahorro</a>
+    <a href="{% url 'dashboard' %}" class="btn-primary" style="background: #666; margin-left: 10px;">Dashboard</a>
+  </div>
+</div>
+{% endblock %}
+
+
+

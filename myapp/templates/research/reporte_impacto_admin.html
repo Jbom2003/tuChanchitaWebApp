@@ -1,0 +1,155 @@
+{% extends 'layout/base.html' %}
+{% load static %}
+{% block title %}Reporte de Impacto - TuChanchita{% endblock %}
+
+{% block extra_css %}
+<style>
+.reporte-container {
+  max-width: 1200px;
+  margin: 40px auto;
+  padding: 30px;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-bottom: 40px;
+}
+
+.stat-card {
+  background: rgba(255, 255, 255, 0.07);
+  padding: 25px;
+  border-radius: 10px;
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 36px;
+  font-weight: bold;
+  color: #60A5FA;
+  margin: 10px 0;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+  margin-top: 20px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+th, td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+th {
+  background: rgba(96, 165, 250, 0.2);
+  font-weight: bold;
+}
+
+.btn-export {
+  background: #4caf50;
+  color: white;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  text-decoration: none;
+  display: inline-block;
+  margin-bottom: 20px;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="reporte-container">
+  <h2>Reporte de Impacto - Investigacion</h2>
+  
+  <div style="margin-bottom: 30px;">
+    <a href="?export=csv" class="btn-export">Exportar a CSV</a>
+  </div>
+  
+  <h3>Metricas Agregadas</h3>
+  <div class="stats-grid">
+    <div class="stat-card">
+      <h4>Total Usuarios</h4>
+      <div class="stat-value">{{ total_usuarios }}</div>
+    </div>
+    
+    <div class="stat-card">
+      <h4>Usuarios con Mejora >=30%</h4>
+      <div class="stat-value" style="color: #4caf50;">{{ usuarios_con_mejora }}</div>
+      <p>{{ usuarios_con_mejora|floatformat:0 }}% del total</p>
+    </div>
+    
+    <div class="stat-card">
+      <h4>Usuarios con Reduccion Riesgo >=25%</h4>
+      <div class="stat-value" style="color: #4caf50;">{{ usuarios_con_reduccion_riesgo }}</div>
+      <p>{{ usuarios_con_reduccion_riesgo|floatformat:0 }}% del total</p>
+    </div>
+    
+    <div class="stat-card">
+      <h4>Mejora Promedio</h4>
+      <div class="stat-value">{{ mejora_promedio|floatformat:1 }}%</div>
+    </div>
+    
+    <div class="stat-card">
+      <h4>Reduccion Riesgo Promedio</h4>
+      <div class="stat-value">{{ reduccion_riesgo_promedio|floatformat:1 }}%</div>
+    </div>
+    
+    <div class="stat-card">
+      <h4>Dias Activos Promedio</h4>
+      <div class="stat-value">{{ dias_activos_promedio|floatformat:0 }}</div>
+    </div>
+  </div>
+  
+  <h3>Detalle por Usuario</h3>
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>Email</th>
+          <th>Nombre</th>
+          <th>Dias Activos</th>
+          <th>Mejora %</th>
+          <th>Reduccion Riesgo %</th>
+          <th>Retos Completados</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for metrics in usuarios_con_metricas %}
+          <tr>
+            <td>{{ metrics.user.email }}</td>
+            <td>{{ metrics.user.first_name }} {{ metrics.user.last_name }}</td>
+            <td>{{ metrics.dias_activos }}</td>
+            <td style="color: {% if metrics.mejora_porcentual >= 30 %}#4caf50{% else %}#ff9800{% endif %};">
+              {{ metrics.mejora_porcentual|floatformat:1 }}%
+            </td>
+            <td style="color: {% if metrics.reduccion_riesgo >= 25 %}#4caf50{% else %}#ff9800{% endif %};">
+              {{ metrics.reduccion_riesgo|floatformat:1 }}%
+            </td>
+            <td>{{ metrics.retos_completados }}</td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="6">No hay datos de usuarios aun.</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  
+  <div style="margin-top: 30px;">
+    <a href="{% url 'dashboard' %}" class="btn-export" style="background: #666;">Volver al Dashboard</a>
+  </div>
+</div>
+{% endblock %}
+
+
+

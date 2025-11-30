@@ -1,0 +1,353 @@
+{% extends 'layout/base.html' %}
+{% load static %}
+{% block title %}Evaluacion Inicial - TuChanchita{% endblock %}
+
+{% block extra_css %}
+<style>
+.evaluacion-container {
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 30px;
+  background: rgba(255, 255, 255, 0.07);
+  border-radius: 15px;
+  position: relative;
+  z-index: 1;
+}
+
+.evaluacion-container h2 {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.categoria-section {
+  margin-bottom: 40px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+}
+
+.categoria-section h3 {
+  color: #60A5FA;
+  margin-bottom: 20px;
+  border-bottom: 2px solid rgba(96, 165, 250, 0.3);
+  padding-bottom: 10px;
+}
+
+.pregunta-item {
+  margin-bottom: 25px;
+  padding: 15px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+  border-left: 4px solid #60A5FA;
+}
+
+.pregunta-item .pregunta-texto {
+  font-weight: bold;
+  margin-bottom: 15px;
+  color: #fff;
+}
+
+.pregunta-item .opciones {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pregunta-item .opcion {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  background: rgba(30, 58, 138, 0.5);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.pregunta-item .opcion:hover {
+  background: rgba(30, 58, 138, 0.7);
+}
+
+.pregunta-item .opcion input[type="radio"] {
+  margin-right: 10px;
+  cursor: pointer;
+}
+
+.pregunta-item .opcion label {
+  cursor: pointer;
+  flex: 1;
+  color: white;
+}
+
+.info-box {
+  background: rgba(96, 165, 250, 0.2);
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 30px;
+}
+
+.form-group {
+  margin-bottom: 25px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: bold;
+  color: #fff;
+}
+
+.form-group input[type="number"],
+.form-group input[type="text"],
+.form-group input[type="checkbox"] {
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(30, 58, 138, 0.9);
+  color: white;
+  font-size: 16px;
+}
+
+.form-group input[type="number"],
+.form-group input[type="text"] {
+  width: 100%;
+}
+
+.form-group input[type="checkbox"] {
+  width: auto;
+  margin-right: 10px;
+}
+
+.btn-submit {
+  width: 100%;
+  padding: 15px;
+  background: #60A5FA;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  margin-top: 20px;
+  font-weight: bold;
+}
+
+.btn-submit:hover {
+  background: #3B82F6;
+}
+
+.btn-regenerar {
+  background: rgba(96, 165, 250, 0.3);
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-bottom: 20px;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.btn-regenerar:hover {
+  background: rgba(96, 165, 250, 0.5);
+}
+
+/* Fondo animado de burbujas */
+.bubble-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.bubble {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.07);
+  animation: float infinite ease-in-out;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-60px); }
+}
+
+.loading-message {
+  text-align: center;
+  padding: 20px;
+  color: #60A5FA;
+  font-size: 18px;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="bubble-container" id="bubble-container"></div>
+
+<div class="evaluacion-container">
+  <h2>Evaluación Inicial de Competencias Financieras</h2>
+  
+  <div class="info-box">
+    <p><strong>Importante:</strong> Esta evaluación nos ayudará a entender tu nivel actual de conocimiento financiero. 
+    Responde honestamente para obtener recomendaciones personalizadas.</p>
+    <p><strong>Instrucciones:</strong> Responde las preguntas de opción múltiple. Cada categoría tiene 10 preguntas con diferentes niveles de dificultad.</p>
+  </div>
+
+  {% if not preguntas_evaluacion %}
+    <div class="loading-message">
+      <p>Generando preguntas personalizadas con IA... Esto puede tomar unos momentos.</p>
+      <p>Si las preguntas no aparecen, <a href="?regenerar=1" class="btn-regenerar">haz clic aquí para regenerar</a></p>
+    </div>
+  {% else %}
+    <a href="?regenerar=1" class="btn-regenerar">🔄 Regenerar Preguntas</a>
+
+    <form method="post">
+      {% csrf_token %}
+      
+      {% for categoria, preguntas in preguntas_evaluacion.items %}
+        <div class="categoria-section">
+          <h3>
+            {% if categoria == 'presupuesto' %}
+              1. Conocimiento sobre Presupuestos (10 preguntas)
+            {% elif categoria == 'ahorro' %}
+              2. Conocimiento sobre Ahorro (10 preguntas)
+            {% elif categoria == 'credito' %}
+              3. Conocimiento sobre Crédito (10 preguntas)
+            {% elif categoria == 'inversiones' %}
+              4. Conocimiento sobre Inversiones (10 preguntas)
+            {% elif categoria == 'fraudes' %}
+              5. Conocimiento sobre Fraudes Digitales (10 preguntas)
+            {% endif %}
+          </h3>
+          
+          {% for pregunta in preguntas %}
+            <div class="pregunta-item">
+              <div class="pregunta-texto">{{ forloop.counter }}. {{ pregunta.pregunta }}</div>
+              <div class="opciones">
+                {% for opcion_key, opcion_texto in pregunta.opciones.items %}
+                  <div class="opcion">
+                    <input type="radio" 
+                           name="pregunta_{{ categoria }}_{{ forloop.parentloop.counter0 }}" 
+                           value="{{ opcion_key }}" 
+                           id="pregunta_{{ categoria }}_{{ forloop.parentloop.counter0 }}_{{ opcion_key }}"
+                           required>
+                    <label for="pregunta_{{ categoria }}_{{ forloop.parentloop.counter0 }}_{{ opcion_key }}">
+                      {{ opcion_key }}. {{ opcion_texto }}
+                    </label>
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% endfor %}
+      
+      <div class="categoria-section">
+        <h3>6. Situación Crediticia Actual</h3>
+        
+        <div class="form-group">
+          <label>
+            <input type="checkbox" name="tiene_tarjetas_credito">
+            ¿Tienes tarjetas de crédito?
+          </label>
+        </div>
+        
+        <div class="form-group">
+          <label>Cantidad de Tarjetas de Crédito:</label>
+          <input type="number" name="cantidad_tarjetas" min="0" value="0">
+        </div>
+        
+        <div class="form-group">
+          <label>Monto de Deuda Actual (S/.):</label>
+          <input type="number" name="monto_deuda_actual" min="0" step="0.01" value="0">
+        </div>
+        
+        <div class="form-group">
+          <label>Frecuencia de Pago Mínimo (veces al año):</label>
+          <input type="number" name="frecuencia_pago_minimo" min="0" value="0">
+        </div>
+      </div>
+      
+      <div class="categoria-section">
+        <h3>7. Experiencia con Fraudes</h3>
+        
+        <div class="form-group">
+          <label>
+            <input type="checkbox" name="experiencia_fraude">
+            ¿Has sido víctima de fraude digital?
+          </label>
+        </div>
+      </div>
+      
+      <div class="categoria-section">
+        <h3>8. Brecha Teórico-Práctica</h3>
+        <p style="margin-bottom: 20px; opacity: 0.8;">
+          Estas preguntas evalúan tu conocimiento teórico y tu aplicación práctica. 
+          Responde honestamente para obtener una evaluación precisa.
+        </p>
+        
+        <h4 style="color: #93c5fd; margin-top: 20px;">Conocimiento Teórico</h4>
+        {% for pregunta in preguntas_brecha.teorico %}
+          <div class="pregunta-item">
+            <div class="pregunta-texto">{{ forloop.counter }}. {{ pregunta.pregunta }}</div>
+            <div class="opciones">
+              {% for opcion_key, opcion_texto in pregunta.opciones.items %}
+                <div class="opcion">
+                  <input type="radio" 
+                         name="brecha_teorico_{{ forloop.parentloop.counter0 }}" 
+                         value="{{ opcion_key }}" 
+                         id="brecha_teorico_{{ forloop.parentloop.counter0 }}_{{ opcion_key }}"
+                         required>
+                  <label for="brecha_teorico_{{ forloop.parentloop.counter0 }}_{{ opcion_key }}">
+                    {{ opcion_key }}. {{ opcion_texto }}
+                  </label>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+        {% endfor %}
+        
+        <h4 style="color: #93c5fd; margin-top: 30px;">Aplicación Práctica</h4>
+        {% for pregunta in preguntas_brecha.practico %}
+          <div class="pregunta-item">
+            <div class="pregunta-texto">{{ forloop.counter }}. {{ pregunta.pregunta }}</div>
+            <div class="opciones">
+              {% for opcion_key, opcion_texto in pregunta.opciones.items %}
+                <div class="opcion">
+                  <input type="radio" 
+                         name="brecha_practico_{{ forloop.parentloop.counter0 }}" 
+                         value="{{ opcion_key }}" 
+                         id="brecha_practico_{{ forloop.parentloop.counter0 }}_{{ opcion_key }}"
+                         required>
+                  <label for="brecha_practico_{{ forloop.parentloop.counter0 }}_{{ opcion_key }}">
+                    {{ opcion_key }}. {{ opcion_texto }}
+                  </label>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+      
+      <button type="submit" class="btn-submit">Completar Evaluación</button>
+    </form>
+  {% endif %}
+</div>
+
+<script>
+  const container = document.getElementById("bubble-container");
+  for (let i = 0; i < 20; i++) {
+    const bubble = document.createElement("div");
+    bubble.classList.add("bubble");
+    const size = Math.floor(Math.random() * 150) + 50;
+    bubble.style.width = `${size}px`;
+    bubble.style.height = `${size}px`;
+    bubble.style.top = `${Math.random() * 100}%`;
+    bubble.style.left = `${Math.random() * 100}%`;
+    bubble.style.animationDuration = `${(Math.random() * 1.5 + 3.5).toFixed(1)}s`;
+    container.appendChild(bubble);
+  }
+</script>
+{% endblock %}

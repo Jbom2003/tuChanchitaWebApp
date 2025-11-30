@@ -1,0 +1,100 @@
+# ============================================
+# Quality Assurance Pipeline
+# ============================================
+# Este workflow ejecuta automaticamente los tests con coverage
+# cada vez que se hace push o se crea un Pull Request.
+#
+# Caracteristicas:
+# - Ejecuta todos los tests de Django con coverage
+# - Genera reportes HTML y XML de cobertura
+# - Sube los reportes como artifacts descargables
+# - Comenta automaticamente en Pull Requests con el porcentaje de coverage
+# - Usa colores: Verde (>=95%), Naranja (>=90%), Rojo (<90%)
+#
+# Requisitos:
+# - Python 3.11
+# - requirements.txt con todas las dependencias
+# - Tests en myapp/tests.py
+#
+# Uso:
+# - El workflow se ejecuta automaticamente en push/PR
+# - Los reportes se pueden descargar desde la pestaña "Actions" en GitHub
+# - Los comentarios en PRs aparecen automaticamente
+# ============================================
+
+name: Quality Assurance
+
+on:
+  push:
+    branches: [ main, master, develop, 'Branch-Manuel' ]
+  pull_request:
+    branches: [ main, master, develop, 'Branch-Manuel' ]
+
+jobs:
+  test-and-coverage:
+    runs-on: ubuntu-latest
+    
+    # Nota: No se necesita base de datos externa para SQLite
+    # Si en el futuro se usa PostgreSQL, agregar servicio aqui
+    
+    steps:
+    # Paso 1: Obtener el codigo del repositorio
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    # Paso 2: Configurar Python 3.11 con cache de pip para velocidad
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+    
+    # Paso 3: Instalar todas las dependencias del proyecto
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    
+    # Paso 4: Ejecutar migraciones de Django para preparar la base de datos
+    - name: Run migrations
+      run: |
+        python manage.py migrate --noinput
+    
+    # Paso 5: Ejecutar tests con coverage (incluyendo branches)
+    # --branch: Incluye cobertura de ramas condicionales
+    # --show-missing: Muestra las lineas no cubiertas en el reporte
+    - name: Run tests with coverage
+      run: |
+        coverage run --branch manage.py test
+        coverage report --show-missing
+        coverage xml -o coverage.xml
+    
+    # Paso 6: Generar reporte HTML interactivo de coverage
+    - name: Generate HTML coverage report
+      run: |
+        coverage html -d htmlcov
+    
+    # Paso 7: Subir reportes como artifacts (disponibles para descarga)
+    # Los artifacts se mantienen por 30 dias
+    - name: Upload coverage reports
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-report
+        path: |
+          htmlcov/
+          coverage.xml
+        retention-days: 30
+    
+    # Paso 8: Comentar automaticamente en Pull Requests con el coverage
+    # Solo se ejecuta en PRs, no en pushes directos
+    # MINIMUM_GREEN: Porcentaje minimo para mostrar en verde (95%)
+    # MINIMUM_ORANGE: Porcentaje minimo para mostrar en naranja (90%)
+    - name: Coverage Comment (PR only)
+      if: github.event_name == 'pull_request'
+      uses: py-cov-action/python-coverage-comment-action@v3
+      with:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        MINIMUM_GREEN: 95
+        MINIMUM_ORANGE: 90
+        COVERAGE_XML_PATH: coverage.xml
+

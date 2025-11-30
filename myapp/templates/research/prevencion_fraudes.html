@@ -1,0 +1,162 @@
+{% extends 'layout/base.html' %}
+{% load static %}
+{% block title %}Prevencion de Fraudes - TuChanchita{% endblock %}
+
+{% block extra_css %}
+<style>
+.fraudes-container {
+  max-width: 1000px;
+  margin: 40px auto;
+  padding: 30px;
+}
+
+.filtro-tipo {
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.filtro-tipo a {
+  display: inline-block;
+  padding: 10px 20px;
+  margin: 5px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  text-decoration: none;
+  color: white;
+}
+
+.filtro-tipo a.activo {
+  background: #60A5FA;
+}
+
+.contenido-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.fraude-card {
+  background: rgba(255, 255, 255, 0.12);
+  padding: 25px;
+  border-radius: 10px;
+  border-left: 5px solid #f44336;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  color: #fff;
+}
+
+.fraude-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.fraude-card h4 {
+  color: #fff;
+  margin: 15px 0 10px 0;
+  font-size: 1.2em;
+  font-weight: 600;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.fraude-card p {
+  color: rgba(255, 255, 255, 0.95);
+  line-height: 1.7;
+  margin-bottom: 15px;
+  font-size: 0.95em;
+}
+
+.btn-primary {
+  background: #60A5FA;
+  color: white;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 5px;
+  text-decoration: none;
+  display: inline-block;
+  margin-top: 10px;
+}
+
+/* Fondo animado de burbujas */
+.bubble-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.bubble {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.07);
+  animation: float infinite ease-in-out;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-60px); }
+}
+
+.fraudes-container {
+  position: relative;
+  z-index: 1;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="bubble-container" id="bubble-container"></div>
+
+<div class="fraudes-container">
+  <h2 style="color: #fff; text-align: center; margin-bottom: 20px;">Prevencion de Fraudes Digitales</h2>
+  
+  <p style="text-align: center; color: rgba(255,255,255,0.9); margin-bottom: 30px; font-size: 1.1em;">
+    Aprende a protegerte de los fraudes digitales mas comunes en el Peru. Conoce como identificarlos y evitarlos.
+  </p>
+  
+  <div class="filtro-tipo">
+    <a href="{% url 'prevencion_fraudes' %}" class="{% if not request.GET.tipo %}activo{% endif %}">Todos</a>
+    {% for val, label in tipos_fraude %}
+      <a href="?tipo={{ val }}" class="{% if request.GET.tipo == val %}activo{% endif %}">{{ label }}</a>
+    {% endfor %}
+  </div>
+  
+  <div class="contenido-grid">
+    {% for contenido in contenidos %}
+      <div class="fraude-card">
+        <span style="background: #f44336; color: white; padding: 5px 10px; border-radius: 15px; font-size: 0.8em; display: inline-block; margin-bottom: 10px;">
+          {{ contenido.get_tipo_fraude_display }}
+        </span>
+        <h4 style="color: #fff; margin: 10px 0;">{{ contenido.titulo }}</h4>
+        <p style="color: rgba(255,255,255,0.9); line-height: 1.5; margin-bottom: 15px;">{{ contenido.descripcion|truncatewords:25 }}</p>
+        <a href="{% url 'ver_fraude' contenido.id %}" class="btn-primary">Aprender Mas</a>
+      </div>
+    {% empty %}
+      <div style="grid-column: 1 / -1; text-align: center; padding: 40px; background: rgba(255,255,255,0.05); border-radius: 10px;">
+        <p style="color: rgba(255,255,255,0.7); font-size: 1.1em;">No hay contenido disponible para este tipo de fraude.</p>
+        <a href="{% url 'prevencion_fraudes' %}" style="color: #60A5FA; margin-top: 10px; display: inline-block;">Ver todos los fraudes</a>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+
+<script>
+  const container = document.getElementById("bubble-container");
+  for (let i = 0; i < 20; i++) {
+    const bubble = document.createElement("div");
+    bubble.classList.add("bubble");
+    const size = Math.floor(Math.random() * 150) + 50;
+    bubble.style.width = `${size}px`;
+    bubble.style.height = `${size}px`;
+    bubble.style.top = `${Math.random() * 100}%`;
+    bubble.style.left = `${Math.random() * 100}%`;
+    bubble.style.animationDuration = `${(Math.random() * 1.5 + 3.5).toFixed(1)}s`;
+    container.appendChild(bubble);
+  }
+</script>
+{% endblock %}
+

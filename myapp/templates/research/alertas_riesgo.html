@@ -1,0 +1,167 @@
+{% extends 'layout/base.html' %}
+{% load static %}
+{% block title %}Alertas de Riesgo - TuChanchita{% endblock %}
+
+{% block extra_css %}
+<style>
+.alertas-container {
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 30px;
+}
+
+.header-alertas {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.alert-item {
+  background: rgba(255, 255, 255, 0.07);
+  padding: 20px;
+  border-radius: 10px;
+  margin-bottom: 15px;
+  border-left: 5px solid;
+}
+
+.alert-item.alta {
+  border-left-color: #f44336;
+  background: rgba(244, 67, 54, 0.1);
+}
+
+.alert-item.media {
+  border-left-color: #ff9800;
+  background: rgba(255, 152, 0, 0.1);
+}
+
+.alert-item.baja {
+  border-left-color: #4caf50;
+  background: rgba(76, 175, 80, 0.1);
+}
+
+.alert-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.alert-tipo {
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.alert-fecha {
+  opacity: 0.7;
+  font-size: 0.9em;
+}
+
+.no-alertas {
+  text-align: center;
+  padding: 40px;
+  background: rgba(76, 175, 80, 0.2);
+  border-radius: 10px;
+}
+
+.btn-primary {
+  background: #60A5FA;
+  color: white;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  text-decoration: none;
+  display: inline-block;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.btn-primary:hover {
+  background: #3B82F6;
+}
+
+/* Fondo animado de burbujas */
+.bubble-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.bubble {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.07);
+  animation: float infinite ease-in-out;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-60px); }
+}
+
+.alertas-container {
+  position: relative;
+  z-index: 1;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="bubble-container" id="bubble-container"></div>
+
+<div class="alertas-container">
+  <div class="header-alertas">
+    <h2>Alertas de Riesgo Crediticio</h2>
+    {% if alertas_no_vistas_count > 0 %}
+      <span style="background: #f44336; color: white; padding: 5px 15px; border-radius: 20px;">
+        {{ alertas_no_vistas_count }} nuevas
+      </span>
+    {% endif %}
+  </div>
+  
+  {% if alertas %}
+    {% for alerta in alertas %}
+      <div class="alert-item {{ alerta.severidad }}">
+        <div class="alert-header">
+          <span class="alert-tipo">{{ alerta.get_tipo_alerta_display }}</span>
+          <span class="alert-fecha">{{ alerta.fecha_alerta|date:"d/m/Y H:i" }}</span>
+        </div>
+        <p>{{ alerta.descripcion }}</p>
+        <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.2);">
+          <strong>Recomendacion:</strong> {{ alerta.recomendacion }}
+        </div>
+      </div>
+    {% endfor %}
+  {% else %}
+    <div class="no-alertas">
+      <h3>¡Excelente!</h3>
+      <p>No tienes alertas de riesgo activas. Sigue manteniendo buenos habitos financieros.</p>
+    </div>
+  {% endif %}
+  
+  <div style="margin-top: 30px; text-align: center;">
+    <a href="{% url 'dashboard' %}" class="btn-primary" style="background: #666;">Volver al Dashboard</a>
+  </div>
+</div>
+
+<script>
+  const container = document.getElementById("bubble-container");
+  for (let i = 0; i < 20; i++) {
+    const bubble = document.createElement("div");
+    bubble.classList.add("bubble");
+    const size = Math.floor(Math.random() * 150) + 50;
+    bubble.style.width = `${size}px`;
+    bubble.style.height = `${size}px`;
+    bubble.style.top = `${Math.random() * 100}%`;
+    bubble.style.left = `${Math.random() * 100}%`;
+    bubble.style.animationDuration = `${(Math.random() * 1.5 + 3.5).toFixed(1)}s`;
+    container.appendChild(bubble);
+  }
+</script>
+{% endblock %}
+

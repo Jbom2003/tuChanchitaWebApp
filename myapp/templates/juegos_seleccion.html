@@ -1,0 +1,178 @@
+{% extends 'layout/base.html' %}
+{% load static %}
+{% block title %}Juegos - TuChanchita{% endblock %}
+
+{% block extra_css %}
+<style>
+.juegos-container {
+  max-width: 1000px;
+  margin: 40px auto;
+  padding: 30px;
+}
+
+.juegos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+  margin-top: 30px;
+}
+
+.juego-card {
+  background: rgba(255, 255, 255, 0.07);
+  padding: 30px;
+  border-radius: 15px;
+  text-align: center;
+  transition: transform 0.3s, box-shadow 0.3s;
+  border: 2px solid transparent;
+}
+
+.juego-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(96, 165, 250, 0.3);
+  border-color: #60A5FA;
+}
+
+.juego-icon {
+  font-size: 60px;
+  margin-bottom: 20px;
+}
+
+.juego-card h3 {
+  margin: 15px 0;
+  font-size: 24px;
+}
+
+.juego-card p {
+  opacity: 0.8;
+  margin-bottom: 20px;
+  line-height: 1.6;
+}
+
+.puntaje-actual {
+  background: rgba(96, 165, 250, 0.2);
+  padding: 10px 20px;
+  border-radius: 20px;
+  margin: 15px 0;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.btn-jugar {
+  background: #60A5FA;
+  color: white;
+  padding: 15px 30px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  margin-top: 10px;
+  transition: background 0.3s;
+}
+
+.btn-jugar:hover {
+  background: #3B82F6;
+}
+
+.btn-ranking {
+  background: rgba(96, 165, 250, 0.3);
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  margin-top: 10px;
+  margin-left: 10px;
+}
+
+.btn-ranking:hover {
+  background: rgba(96, 165, 250, 0.5);
+}
+
+/* Fondo animado de burbujas */
+.bubble-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.bubble {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.07);
+  animation: float infinite ease-in-out;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-60px); }
+}
+
+.juegos-container {
+  position: relative;
+  z-index: 1;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="bubble-container" id="bubble-container"></div>
+
+<div class="juegos-container">
+  <h2 style="text-align: center; margin-bottom: 10px;">🎮 Juegos Financieros</h2>
+  <p style="text-align: center; opacity: 0.8; margin-bottom: 30px;">
+    Elige un juego para poner a prueba tus conocimientos financieros y ganar puntos
+  </p>
+  
+  <div class="juegos-grid">
+    <!-- Trivia Financiera -->
+    <div class="juego-card">
+      <div class="juego-icon">🧠</div>
+      <h3>Trivia Financiera</h3>
+      <p>Responde preguntas de opción múltiple sobre finanzas personales, economía y más.</p>
+      <div class="puntaje-actual">
+        Puntaje: {{ puntaje_trivia|default:0 }} puntos
+      </div>
+      <a href="{% url 'trivia' %}" class="btn-jugar">Jugar Ahora</a>
+      <a href="{% url 'trivia_ranking' %}" class="btn-ranking">Ver Ranking</a>
+    </div>
+    
+    <!-- Completar Frases -->
+    <div class="juego-card">
+      <div class="juego-icon">✍️</div>
+      <h3>Completar Frases</h3>
+      <p>Completa frases de economía escribiendo la palabra clave correcta. Verificado con IA.</p>
+      <div class="puntaje-actual">
+        Puntaje: {{ puntaje_completar|default:0 }} puntos
+      </div>
+      <a href="{% url 'completar_frases' %}" class="btn-jugar">Jugar Ahora</a>
+      <a href="{% url 'completar_frases_ranking' %}" class="btn-ranking">Ver Ranking</a>
+    </div>
+  </div>
+</div>
+
+<script>
+  const container = document.getElementById("bubble-container");
+  for (let i = 0; i < 20; i++) {
+    const bubble = document.createElement("div");
+    bubble.classList.add("bubble");
+    const size = Math.floor(Math.random() * 150) + 50;
+    bubble.style.width = `${size}px`;
+    bubble.style.height = `${size}px`;
+    bubble.style.top = `${Math.random() * 100}%`;
+    bubble.style.left = `${Math.random() * 100}%`;
+    bubble.style.animationDuration = `${(Math.random() * 1.5 + 3.5).toFixed(1)}s`;
+    container.appendChild(bubble);
+  }
+</script>
+{% endblock %}
+
